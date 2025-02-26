@@ -1,12 +1,21 @@
 const Exam = require("../models/exam.model");
 
 const paginationHelper = require("../../../helpers/pagination");
+const searchHelper = require("../../../helpers/search");
 
 // [GET] /api/v1/exams/index
 module.exports.index = async(req, res) => {
     const find = {
         deleted: false
     };
+
+    // search
+    let objectSearch = searchHelper(req.query);
+    
+    if (req.query.keyword) {
+        find.title = objectSearch.regex;
+    }
+    // end search
 
     // sort
     const sort = {};
