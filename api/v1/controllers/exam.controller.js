@@ -1,5 +1,7 @@
 const Exam = require("../models/exam.model");
 
+const paginationHelper = require("../../../helpers/pagination");
+
 // [GET] /api/v1/exams/index
 module.exports.index = async(req, res) => {
     const find = {
@@ -14,7 +16,22 @@ module.exports.index = async(req, res) => {
     }
     // end sort
 
-    const exam = await Exam.find(find).sort(sort);
+    // pagination
+    let initPagination = {
+        currentPage: 1,
+        limitItem: 3
+    }
+
+    const countExams = await Exam.countDocuments(find);
+
+    const objectPagination = paginationHelper(
+        initPagination,
+        req.query,
+        countExams
+    );
+    // end pagination
+
+    const exam = await Exam.find(find).sort(sort).skip(objectPagination.skip).limit(objectPagination.limitItem);
 
     res.json(exam);
 };
@@ -37,21 +54,3 @@ module.exports.detail = async(req, res) => {
         });
     }
 };
-
-// // [GET] /api/v1/exams/index
-// module.exports.index = async(req, res) => {
-//     const find = {
-//         deleted: false
-//     };
-
-//     // sort
-//     const sort = {};
-
-//     if (req.query.sortKey && req.query.sortValue) {
-//         sort[req.query.sortKey] = req.query.sortValue;
-//     }
-
-//     const exam = await Exam.find(find).sort(sort);
-
-//     res.json(exam);
-// };
