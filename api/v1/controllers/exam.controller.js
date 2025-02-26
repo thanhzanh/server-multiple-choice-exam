@@ -88,3 +88,22 @@ module.exports.changeStatus = async(req, res) => {
         });
     }
 };
+
+// [GET] /api/v1/exams/create
+module.exports.create = async(req, res) => {
+    try {
+        const exam = new Exam(req.body)
+        const data = await exam.save();
+        
+        res.json({
+            code: 200,
+            message: "Tạo bài thi thành công",
+            data: data
+        });
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Đã xãy ra lỗi"
+        });
+    }
+};
