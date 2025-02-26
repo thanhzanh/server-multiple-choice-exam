@@ -6,7 +6,15 @@ module.exports.index = async(req, res) => {
         deleted: false
     };
 
-    const exam = await Exam.find(find);
+    // sort
+    const sort = {};
+
+    if (req.query.sortKey && req.query.sortValue) {
+        sort[req.query.sortKey] = req.query.sortValue;
+    }
+    // end sort
+
+    const exam = await Exam.find(find).sort(sort);
 
     res.json(exam);
 };
@@ -29,3 +37,21 @@ module.exports.detail = async(req, res) => {
         });
     }
 };
+
+// // [GET] /api/v1/exams/index
+// module.exports.index = async(req, res) => {
+//     const find = {
+//         deleted: false
+//     };
+
+//     // sort
+//     const sort = {};
+
+//     if (req.query.sortKey && req.query.sortValue) {
+//         sort[req.query.sortKey] = req.query.sortValue;
+//     }
+
+//     const exam = await Exam.find(find).sort(sort);
+
+//     res.json(exam);
+// };
