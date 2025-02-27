@@ -128,3 +128,27 @@ module.exports.edit = async(req, res) => {
         });
     }
 };
+
+// [DELETE] /api/v1/exams/delete/:id
+module.exports.delete = async(req, res) => {
+    try {
+        const id = req.params.id;
+        
+        await Exam.updateMany({
+            _id: id
+        }, {
+            deleted: true,
+            deletedAt: new Date()
+        });
+        
+        res.json({
+            code: 200,
+            message: "Xóa bài thi thành công"
+        });
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Đã xãy ra lỗi"
+        });
+    }
+};
