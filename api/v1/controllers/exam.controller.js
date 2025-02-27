@@ -107,3 +107,24 @@ module.exports.create = async(req, res) => {
         });
     }
 };
+
+// [PATCH] /api/v1/exams/edit/:id
+module.exports.edit = async(req, res) => {
+    try {
+        const id = req.params.id;
+        
+        await Exam.updateOne({
+            _id: id
+        }, req.body);
+        
+        res.json({
+            code: 200,
+            message: "Chỉnh sửa thành công"
+        });
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Đã xãy ra lỗi"
+        });
+    }
+};
