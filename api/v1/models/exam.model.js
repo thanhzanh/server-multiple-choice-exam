@@ -12,6 +12,7 @@ const examSchema = new mongoose.Schema(
         },
         subject: String,
         topic: String,
+        privacy: String,
         deleted: {
             type: Boolean,
             default: false

@@ -68,14 +68,27 @@ module.exports.detail = async(req, res) => {
 module.exports.changeStatus = async(req, res) => {
     try {
         const id = req.params.id;
-        const status = req.body.status;
+        const { status, privacy } = req.body;
+
+        // kiểm tra exam có tồn tại không
+        const exam = await Exam.findById(id);
+        if (!exam) {
+            res.json({
+                code: 400,
+                message: "Không tồn tại"
+            });
+        }
+
+        let updateData = {};
+        if (status) {
+            updateData.status = status;
+        }
+        if (privacy) {
+            updateData.privacy = privacy;
+        }
 
         // save database
-        await Exam.updateOne({
-            _id: id
-        }, {
-            status: status
-        });
+        await Exam.updateOne({ _id: id }, updateData);
         
         res.json({
             code: 200,
