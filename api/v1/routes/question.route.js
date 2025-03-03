@@ -7,4 +7,6 @@ router.get("/index", controller.index);
 
 router.get("/create", controller.create);
 
+router.get("/detail/:id", controller.detail);
+
 module.exports = router;

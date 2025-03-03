@@ -59,3 +59,24 @@ module.exports.create = async(req, res) => {
         });
     }
 };
+
+// [GET] /api/v1/questions/detail/:id
+module.exports.detail = async(req, res) => {
+
+    try {
+        const id = req.params.id;
+        
+        const question = await Question.findOne({
+            _id: id,
+            deleted: false
+        });
+
+        res.json(question);
+        
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tìm thấy",
+        });
+    }
+};
