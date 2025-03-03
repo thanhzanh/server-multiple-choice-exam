@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
-    {       
+    {    
+        googleId: String,   
         fullName: String,
         email: String,
         password: String,
+        avatar: String,
         token: {
             type: String,
             default: generate.generateRandomString(30)

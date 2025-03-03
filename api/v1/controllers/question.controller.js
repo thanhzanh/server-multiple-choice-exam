@@ -1,0 +1,61 @@
+const Question = require("../models/question.model");
+const Exam = require("../models/exam.model");
+
+// [GET] /api/v1/questions/index
+module.exports.index = async(req, res) => {
+
+    const find = {
+        deleted: false
+    };
+
+    const questions = await Question.find(find);
+    console.log(questions);
+    
+
+    res.json({
+        code: 200
+    });
+};
+
+// [GET] /api/v1/questions/create
+module.exports.create = async(req, res) => {
+
+    try {
+        const { examId, questionText, type, options, correctAnswer } = req.body;
+    
+        const existExam = await Exam.findOne({
+            _id: examId,
+            deleted: false
+        });
+
+        // kiểm tra bài thi tồn tại không
+        if (!existExam) {
+            res.json({
+                code: 200,
+                message: "Bài thi không tồn tại"
+            });
+            return;
+        }
+
+        // lưu vào database
+        const questions = new Question({
+            examId,
+            questionText,
+            type,
+            options: options || [],
+            correctAnswer: correctAnswer || []
+        });
+        await questions.save();
+        
+        res.json({
+            code: 200,
+            message: "Tạo câu hỏi thành công",
+            questions: questions
+        });
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Bài thi không tồn tại",
+        });
+    }
+};
