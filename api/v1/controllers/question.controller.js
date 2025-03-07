@@ -80,3 +80,27 @@ module.exports.detail = async(req, res) => {
         });
     }
 };
+
+// [PUT] /api/v1/questions/edit/:id
+module.exports.edit = async(req, res) => {
+
+    try {
+        const id = req.params.id;
+        
+        // update data database
+        await Question.updateOne({
+            _id: id,
+        }, req.body);
+
+        res.json({
+            code: 200,
+            message: "Cập nhật thành công"
+        });
+        
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Đã xảy ra lỗi",
+        });
+    }
+};

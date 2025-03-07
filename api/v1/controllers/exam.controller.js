@@ -102,10 +102,13 @@ module.exports.changeStatus = async(req, res) => {
     }
 };
 
-// [GET] /api/v1/exams/create
+// [POST] /api/v1/exams/create
 module.exports.create = async(req, res) => {
     try {
-        const exam = new Exam(req.body)
+        const { title, description, level, subject, topic, privacy, status } = req.body;
+        const image = req.file ? req.file.filename : null; // Lưu file ảnh
+
+        const exam = new Exam({ title, description, level, subject, topic, privacy, status, image });
         const data = await exam.save();
         
         res.json({

@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const examSchema = new mongoose.Schema(
     {       
         title: String,
-        status: String,
         description: String,
         image: String,
         level: {
@@ -12,7 +11,8 @@ const examSchema = new mongoose.Schema(
         },
         subject: String,
         topic: String,
-        privacy: String,
+        privacy: { type: String, enum: ["private", "public"], default: "private" },
+        status: { type: String, enum: ["active", "inactive"], default: "active" },
         deleted: {
             type: Boolean,
             default: false
