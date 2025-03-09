@@ -17,7 +17,7 @@ module.exports.index = async(req, res) => {
     });
 };
 
-// [GET] /api/v1/questions/create
+// [POST] /api/v1/questions/create
 module.exports.create = async(req, res) => {
 
     try {
@@ -101,6 +101,28 @@ module.exports.edit = async(req, res) => {
         res.json({
             code: 400,
             message: "Đã xảy ra lỗi",
+        });
+    }
+};
+
+// [GET] /api/v1/questions/getQuestionsByExam/:examId
+module.exports.getQuestionsByExam = async(req, res) => {
+
+    try {
+        const examId = req.params.examId;
+        
+        /// lấy question từ data
+        const questions = await Question.find({
+            examId: examId,
+            deleted: false
+        });
+
+        res.json(questions);
+        
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tìm thấy câu hỏi nào",
         });
     }
 };
