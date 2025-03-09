@@ -6,7 +6,8 @@ const searchHelper = require("../../../helpers/search");
 // [GET] /api/v1/exams/index
 module.exports.index = async(req, res) => {
     const find = {
-        deleted: false
+        deleted: false,
+        status: "active"
     };
 
     // search
@@ -42,7 +43,10 @@ module.exports.index = async(req, res) => {
 
     const exam = await Exam.find(find).sort(sort).skip(objectPagination.skip).limit(objectPagination.limitItem);
 
-    res.json(exam);
+    res.json({
+        exam, 
+        pagination: objectPagination
+    });
 };
 
 // [GET] /api/v1/exams/detail/:id
@@ -127,11 +131,17 @@ module.exports.create = async(req, res) => {
 // [PATCH] /api/v1/exams/edit/:id
 module.exports.edit = async(req, res) => {
     try {
-        const id = req.params.id;
+        const { id } = req.params;
+        const updatedData = req.body;
         
+        // Nếu có ảnh, thêm ảnh vào dữ liệu cập nhật
+        if (req.file) {
+            updatedData.image = req.file.filename;
+        }
+             
         await Exam.updateOne({
             _id: id
-        }, req.body);
+        }, updatedData);
         
         res.json({
             code: 200,
@@ -165,6 +175,25 @@ module.exports.delete = async(req, res) => {
         res.json({
             code: 400,
             message: "Đã xãy ra lỗi"
+        });
+    }
+};
+
+// [GET] /api/v1/exams/detail/:id
+module.exports.detail = async(req, res) => {
+    try {
+        const id = req.params.id;        
+
+        const exam = await Exam.findOne({
+            _id: id,
+            deleted: false
+        });
+
+        res.json(exam);
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tìm thấy"
         });
     }
 };
