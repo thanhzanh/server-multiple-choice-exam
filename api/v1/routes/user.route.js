@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const authMiddleware = require("../../../middlewares/authMiddleware");
 
 const controller = require("../controllers/user.controller");
 
-router.post("/register", controller.register);
+router.post("/register",authMiddleware.checkSecurity, controller.register);
+
+router.post("/login", controller.login);
 
 module.exports = router;
