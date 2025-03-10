@@ -85,11 +85,11 @@ module.exports.detail = async(req, res) => {
 module.exports.edit = async(req, res) => {
 
     try {
-        const examId = req.params.examId;
+        const id = req.params.id;        
               
         // update data database
         const updateQuestion = await Question.findByIdAndUpdate(
-            { _id: examId },
+            id,
             { ...req.body, updatedAt: Date.now() },
             { new: true }
         );
@@ -97,7 +97,7 @@ module.exports.edit = async(req, res) => {
         if (!updateQuestion) {
             return res.json({
                 code: 400,
-                message: "lỗi cập nhật câu hỏi"
+                message: "Lỗi cập nhật câu hỏi"
             });
         }
 
