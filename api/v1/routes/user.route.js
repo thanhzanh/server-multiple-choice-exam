@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authMiddleware = require("../../../middlewares/authMiddleware");
+const passwordMiddleware = require("../../../middlewares/emailMiddleware");
 
 const controller = require("../controllers/user.controller");
 
@@ -12,5 +13,7 @@ router.post("/login", controller.login);
 router.post("/password/forgot", controller.forgotPassword);
 
 router.post("/password/otp", controller.otpPassword);
+
+router.post("/password/reset", controller.resetPassword);
 
 module.exports = router;

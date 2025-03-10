@@ -170,3 +170,44 @@ module.exports.otpPassword = async (req, res) => {
     });
 
 };
+
+// [POST] /api/v1/users/password/reset
+module.exports.resetPassword = async (req, res) => {
+    const token = req.body.token;
+    const password = req.body.password;
+
+    // lấy ra user theo token
+    const user = await User.findOne({
+        token: token,
+    });
+
+    if (!user) {
+        return res.status(404).json({
+            code: 404,
+            message: "Token không hợp lệ hoặc người dùng không tồn tại",
+        });
+    }
+
+    // Kiểm tra mật khẩu mới có trùng với mật khẩu cũ không
+    if (md5(password) === user.password) {
+        res.json({
+            code: 400,
+            message: "Vui lòng nhập mật khẩu khác mật khẩu cũ"
+        });
+        return;
+    }
+
+    // lưu vào database
+    await User.updateOne({
+        token: token
+    }, {
+        password: md5(password)
+    });
+
+    res.json({
+        code: 200,
+        message: "Đổi mật khẩu thành công",
+        token: token
+    });
+
+};
