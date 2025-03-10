@@ -85,16 +85,26 @@ module.exports.detail = async(req, res) => {
 module.exports.edit = async(req, res) => {
 
     try {
-        const id = req.params.id;
-        
+        const examId = req.params.examId;
+              
         // update data database
-        await Question.updateOne({
-            _id: id,
-        }, req.body);
+        const updateQuestion = await Question.findByIdAndUpdate(
+            { _id: examId },
+            { ...req.body, updatedAt: Date.now() },
+            { new: true }
+        );
+
+        if (!updateQuestion) {
+            return res.json({
+                code: 400,
+                message: "lỗi cập nhật câu hỏi"
+            });
+        }
 
         res.json({
             code: 200,
-            message: "Cập nhật thành công"
+            message: "Cập nhật thành công",
+            data: updateQuestion // trả về câu hỏi đã cập nhật
         });
         
     } catch (error) {
@@ -117,7 +127,35 @@ module.exports.getQuestionsByExam = async(req, res) => {
             deleted: false
         });
 
-        res.json(questions);
+        res.json({
+            code: 200,
+            data: questions || []
+        });
+        
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tìm thấy câu hỏi nào",
+        });
+    }
+};
+
+// [GET] /api/v1/questions/countQuestion/:examId
+module.exports.countQuestion = async(req, res) => {
+
+    try {
+        const examId = req.params.examId;
+              
+        // đếm số câu hỏi của bài thi
+        const countQuestion = await Question.countDocuments({
+            examId: examId,
+            deleted: false
+        });
+
+        res.json({
+            code: 200,
+            totalQuestion: countQuestion
+        });
         
     } catch (error) {
         res.json({

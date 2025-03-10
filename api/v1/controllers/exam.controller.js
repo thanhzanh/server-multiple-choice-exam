@@ -29,7 +29,7 @@ module.exports.index = async(req, res) => {
     // pagination
     let initPagination = {
         currentPage: 1,
-        limitItem: 3
+        limitItem: 8
     }
 
     const countExams = await Exam.countDocuments(find);

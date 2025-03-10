@@ -9,6 +9,10 @@ router.post("/create", controller.create);
 
 router.get("/detail/:id", controller.detail);
 
+router.put("/edit/:examId", controller.edit);
+
 router.get("/getQuestionsByExam/:examId", controller.getQuestionsByExam);
+
+router.get("/countQuestion/:examId", controller.countQuestion);
 
 module.exports = router;
