@@ -19,6 +19,13 @@ module.exports.register = async(req, res) => {
         deleted: false
     });
 
+    if (!fullName) {
+        res.json({
+            code: 400,
+            message: "Vui lòng nhập tên người dùng"
+        });
+    }
+
     // Check email tồn tại chưa
     if (existEmail) {
         res.json({
@@ -210,4 +217,21 @@ module.exports.resetPassword = async (req, res) => {
         token: token
     });
 
+};
+
+// 
+module.exports.googleLogin = async (req, res) => {
+    try {
+        const user = req.user; // Lấy thông tin user từ Passport
+        const token = user.token;
+        res.cookie("token", token);
+        res.json({
+            code: 200,
+            message: "Đăng nhập Google thành công",
+            user,
+            token,
+        });
+    } catch (error) {
+        res.status(500).json({ code: 500, message: "Lỗi server!" });
+    }
 };
