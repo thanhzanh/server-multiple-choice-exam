@@ -8,55 +8,68 @@ const ForgotPassword = require("../models/forgot-password.model");
 
 const genareteHelper = require("../../../helpers/generate");
 const sendMailHelper = require("../../../helpers/sendMail");
+const { response } = require("express");
 
 // [POST] /api/v1/users/register
 module.exports.register = async(req, res) => {
     
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, password_confirmation } = req.body;    
 
     const existEmail = await User.findOne({
         email: email,
         deleted: false
     });
 
-    if (!fullName) {
-        res.json({
-            code: 400,
-            message: "Vui lòng nhập tên người dùng"
-        });
-    }
-
     // Check email tồn tại chưa
     if (existEmail) {
-        res.json({
+        res.status(400).json({
             code: 400,
+            err: "existEmail",
             message: "Email đã tồn tại"
         });
-    } else {
-        // Mã hóa password
-        const hashedPassword = md5(password);
-
-        const user = new User({
-            fullName: fullName,
-            email: email,
-            password: hashedPassword,
-            avatar: "https://i.pravatar.cc/300" // avatar mặc định
+        return;
+    } 
+    
+    if (!password || !password_confirmation) {
+        res.status(400).json({
+            code: 400,
+            err: "missingPassword",
+            message: "Vui lòng nhập mật khẩu và xác nhận mật khẩu"
         });
-
-        // lưu vào database
-        await user.save();
-
-        // Lưu token
-        const token = user.token;
-        res.cookie("token", token);
-
-        res.json({
-            code: 200,
-            message: "Tạo tài khoản thành công",
-            token: token
-        });
-
+        return;
     }
+
+    if (String(password) !== String(password_confirmation)) {
+        res.status(400).json({
+            code: 400,
+            err: "confirmPassword",
+            message: "Vui lòng nhập đúng mật khẩu ở trên"
+        });
+        return;
+    }
+    
+    // Mã hóa password
+    const hashedPassword = md5(password);
+
+    const user = new User({
+        fullName: fullName,
+        email: email,
+        password: hashedPassword,
+        avatar: "https://i.pravatar.cc/300" // avatar mặc định
+    });
+
+    // lưu vào database
+    await user.save();
+
+    // Lưu token
+    const token = user.token;
+    res.cookie("token", token);
+
+    res.status(200).json({
+        code: 200,
+        message: "Tạo tài khoản thành công",
+        token: token
+    });
 };
 
 // [POST] /api/v1/users/login
@@ -223,14 +236,15 @@ module.exports.resetPassword = async (req, res) => {
 module.exports.googleLogin = async (req, res) => {
     try {
         const user = req.user; // Lấy thông tin user từ Passport
-        const token = user.token;
-        res.cookie("token", token);
-        res.json({
-            code: 200,
-            message: "Đăng nhập Google thành công",
-            user,
-            token,
-        });
+        if(!user) {
+            return res.redirect("http://localhost:5173/home?error=Unauthorized");
+        }
+
+        const token = user.token; // lay token cua user
+        res.cookie("token", token, { httpOnly: true, secure: false });
+        
+        // Redirect về frontend sau khi đăng nhập thành công
+        return res.redirect("http://localhost:5173/workspace/exams/list");
     } catch (error) {
         res.status(500).json({ code: 500, message: "Lỗi server!" });
     }

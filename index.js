@@ -17,6 +17,8 @@ database.connect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(express.json()); // Giúp đọc dữ liệu JSON từ request body
+app.use(express.urlencoded({ extended: true })); // Đọc dữ liệu form
 
 // Cấu hình express-session
 app.use(
@@ -37,7 +39,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Cho phép tất cả các domain truy cập API
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173", // Đổi thành domain frontend của bạn
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  }));
 
 // upload ảnh
 app.use("/uploads", express.static("uploads"));
