@@ -3,6 +3,7 @@ require("dotenv").config();
 const cors = require("cors");
 const multer = require("multer");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const passport = require("./config/passport");
 const database = require("./config/database");
@@ -19,6 +20,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json()); // Giúp đọc dữ liệu JSON từ request body
 app.use(express.urlencoded({ extended: true })); // Đọc dữ liệu form
+
+// Thêm cookie-parser
+app.use(cookieParser());
 
 // Cấu hình express-session
 app.use(

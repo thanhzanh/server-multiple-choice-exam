@@ -1,14 +1,14 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const passport = require("passport");
 const md5 = require("md5");
-
+const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/user.model");
 const ForgotPassword = require("../models/forgot-password.model");
 
 const genareteHelper = require("../../../helpers/generate");
 const sendMailHelper = require("../../../helpers/sendMail");
 const { response } = require("express");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // [POST] /api/v1/users/register
 module.exports.register = async(req, res) => {
@@ -83,7 +83,7 @@ module.exports.login = async (req, res) => {
     });
 
     if (!user) {
-        res.json({
+        res.status(400).json({
             code: 400,
             message: "Email không tồn tại!",
         });
@@ -91,7 +91,7 @@ module.exports.login = async (req, res) => {
     }
 
     if (md5(password) != user.password) {
-        res.json({
+        res.status(400).json({
             code: 400,
             message: "Sai mật khẩu!"
         });
@@ -99,11 +99,15 @@ module.exports.login = async (req, res) => {
     }
 
     const token = user.token;
-    res.cookie("token", token);
+    res.cookie("token", token, {
+        httpOnly: true, // Chặn JS đọc cookie
+        secure: false, // Để false khi test, production thì dùng true
+        sameSite: "strict", // Ngăn CSRF
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 giờ
+    });
 
-    res.json({
+    res.status(200).json({
         code: 200,
-        message: "Đăng nhập thành công",
         token: token
     });
 };
@@ -233,19 +237,67 @@ module.exports.resetPassword = async (req, res) => {
 };
 
 // 
-module.exports.googleLogin = async (req, res) => {
+module.exports.authGoogle = async (req, res) => {
     try {
-        const user = req.user; // Lấy thông tin user từ Passport
-        if(!user) {
-            return res.redirect("http://localhost:5173/home?error=Unauthorized");
+        const { token } = req.body; // Nhận token từ frontend
+        
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu token"
+            });
         }
 
-        const token = user.token; // lay token cua user
-        res.cookie("token", token, { httpOnly: true, secure: false });
+        // Xác thực token từ Google
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload(); // Dữ liệu user từ Google
+
+        // Lấy ra user theo email
+        let user = await User.findOne({ email: payload.email });
+
+        if (!user) {
+            // Nếu user chưa tồn tại thì tạo mới
+            user = new User({
+                googleId: payload.sub,
+                fullName: payload.name,
+                email: payload.email,
+                avatar: payload.picture,
+                password: null
+            });
+
+            await user.save();
+        }
+
+        const authToken  = user.token;
+        res.cookie("token", authToken,
+            {
+                httpOnly: true, // Ngăn chặn JavaScript đọc cookie
+                secure: process.env.NODE_ENV === "production", // Chỉ bật trên HTTPS
+                sameSite: "strict", // Giảm nguy cơ CSRF
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+            }
+        );
         
-        // Redirect về frontend sau khi đăng nhập thành công
-        return res.redirect("http://localhost:5173/workspace/exams/list");
+        res.status(200).json({
+            success: true,
+            message: "Đăng nhập Google thành công",
+            token: authToken,
+            user: {
+                id: user._id,
+                name: user.fullName,
+                email: user.email
+            }
+        });
+
     } catch (error) {
-        res.status(500).json({ code: 500, message: "Lỗi server!" });
+        console.error("Lỗi xác thực Google", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server"
+        });
     }
 };
