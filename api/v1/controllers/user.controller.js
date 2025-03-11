@@ -236,7 +236,7 @@ module.exports.resetPassword = async (req, res) => {
 
 };
 
-// 
+// [POST] /api/v1/users/auth/google
 module.exports.authGoogle = async (req, res) => {
     try {
         const { token } = req.body; // Nhận token từ frontend
@@ -300,4 +300,11 @@ module.exports.authGoogle = async (req, res) => {
             message: "Lỗi server"
         });
     }
+};
+
+// [POST] /api/v1/users/logout
+module.exports.logout = async (req, res) => {
+    // xóa cookie ra khỏi trình duyệt
+    res.clearCookie("token");
+    res.json({ message: "Đăng xuất thành công" });
 };

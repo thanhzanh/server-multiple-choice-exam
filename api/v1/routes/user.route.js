@@ -22,4 +22,6 @@ router.post("/password/reset", controller.resetPassword);
 // Đăng nhập Google
 router.post('/auth/google', controller.authGoogle);
 
+router.post("/logout", controller.logout);
+
 module.exports = router;
