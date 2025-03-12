@@ -25,6 +25,6 @@ router.post('/auth/google', controller.authGoogle);
 
 router.post("/logout", controller.logout);
 
-router.get("/getToken", authMiddleware.requireAuth, controller.getToken);
+router.get("/getUser", authMiddleware.requireAuth, controller.getUser);
 
 module.exports = router;

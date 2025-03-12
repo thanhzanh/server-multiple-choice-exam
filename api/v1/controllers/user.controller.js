@@ -309,17 +309,16 @@ module.exports.logout = async (req, res) => {
     res.json({ message: "Đăng xuất thành công" });
 };
 
-// [GET] /api/v1/users/getToken
-module.exports.getToken = async (req, res) => {
+// [GET] /api/v1/users/getUser
+module.exports.getUser = async (req, res) => {
     try {
-        if (!req.user) {
-            return res.status(401).json({ message: "Không có quyền truy cập" });
+        const user = await User.findById(res.locals.user._id).select("-password");        
+
+        if (!user) {
+            return res.status(400).json({ message: "Người dùng không tồn tại" });
         }
     
-        res.status(200).json({
-            code: 200,
-            user: req.user, // Trả về thông tin user
-        });
+        res.json(user);
     } catch (error) {
         res.status(400).json({ message: "Không có token" });
     }
