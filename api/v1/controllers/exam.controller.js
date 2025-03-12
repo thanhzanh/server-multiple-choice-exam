@@ -108,11 +108,19 @@ module.exports.changeStatus = async(req, res) => {
 
 // [POST] /api/v1/exams/create
 module.exports.create = async(req, res) => {
+
     try {
         const { title, description, level, subject, topic, privacy, status } = req.body;
         const image = req.file ? req.file.filename : null; // Lưu file ảnh
 
-        const exam = new Exam({ title, description, level, subject, topic, privacy, status, image });
+        // User nào tạo bài thi
+        if (!res.locals.user) {
+            return res.status(401).json({ code: 401, message: "Chưa xác thực người dùng" });
+        }
+        createdBy = res.locals.user._id;
+        
+        // Lưu vào database
+        const exam = new Exam({ title, description, image, level, subject, topic, privacy, status, createdBy });
         const data = await exam.save();
         
         res.json({

@@ -2,27 +2,27 @@ const User = require("../api/v1/models/user.model");
 
 module.exports.requireAuth = async (req, res, next) => {
 
-    if (req.headers.authorization) {
-        const token = req.cookies.token;
-        
+    const token = req.cookies.token;
+
+    try {
         const user = await User.findOne({
             token: token,
             deleted: false
-        }).select("-password");
+        }).select("-password");        
 
         if (!user) {
             res.status(400).json({
                 code: 400,
-                message: "Bạn chưa đăng nhập"
+                message: "Token không hợp lệ"
             });
             return;
         }
 
         // login by user (Thong tin user)
-        req.user = user;
+        res.locals.user = user; // Gán user vào request để các route sau có thể dùng
 
         next();
-    } else {
+    } catch (error) {
         return res.status(400).json({
             code: 400,
             message: "Phiên đăng nhập đã hết hạn"

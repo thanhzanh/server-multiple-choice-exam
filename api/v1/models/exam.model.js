@@ -13,6 +13,11 @@ const examSchema = new mongoose.Schema(
         topic: String,
         privacy: { type: String, enum: ["private", "public"], default: "private" },
         status: { type: String, enum: ["active", "inactive"], default: "active" },
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true 
+        },
         deleted: {
             type: Boolean,
             default: false

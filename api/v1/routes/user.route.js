@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 
 const accountMiddleware = require("../../../middlewares/accountMiddleware");
+const authMiddleware = require("../../../middlewares/auth.middleware");
 
 const controller = require("../controllers/user.controller");
 
@@ -23,5 +24,7 @@ router.post("/password/reset", controller.resetPassword);
 router.post('/auth/google', controller.authGoogle);
 
 router.post("/logout", controller.logout);
+
+router.get("/getToken", authMiddleware.requireAuth, controller.getToken);
 
 module.exports = router;

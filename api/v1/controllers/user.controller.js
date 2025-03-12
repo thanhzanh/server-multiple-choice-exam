@@ -308,3 +308,19 @@ module.exports.logout = async (req, res) => {
     res.clearCookie("token");
     res.json({ message: "Đăng xuất thành công" });
 };
+
+// [GET] /api/v1/users/getToken
+module.exports.getToken = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Không có quyền truy cập" });
+        }
+    
+        res.status(200).json({
+            code: 200,
+            user: req.user, // Trả về thông tin user
+        });
+    } catch (error) {
+        res.status(400).json({ message: "Không có token" });
+    }
+};
