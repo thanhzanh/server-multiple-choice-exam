@@ -1,13 +1,15 @@
 const Exam = require("../models/exam.model");
-
+const User = require("../models/user.model");
 const paginationHelper = require("../../../helpers/pagination");
 const searchHelper = require("../../../helpers/search");
 
 // [GET] /api/v1/exams/index
 module.exports.index = async(req, res) => {
+    const user = res.locals.user; // user người dùng đăng nhập
     const find = {
         deleted: false,
-        status: "active"
+        status: "active",
+        createdBy: user._id
     };
 
     // search
@@ -41,10 +43,10 @@ module.exports.index = async(req, res) => {
     );
     // end pagination
 
-    const exam = await Exam.find(find).sort(sort).skip(objectPagination.skip).limit(objectPagination.limitItem);
-
+    const exams = await Exam.find(find).sort(sort).skip(objectPagination.skip).limit(objectPagination.limitItem);
+        
     res.json({
-        exam, 
+        exams, 
         pagination: objectPagination
     });
 };
