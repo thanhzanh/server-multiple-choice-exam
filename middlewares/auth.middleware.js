@@ -11,9 +11,9 @@ module.exports.requireAuth = async (req, res, next) => {
         }).select("-password");        
 
         if (!user) {
-            res.status(400).json({
-                code: 400,
-                message: "Token không hợp lệ"
+            res.status(401).json({
+                code: 401,
+                message: "Bạn chưa đăng nhập, vui lòng đăng nhập"
             });
             return;
         }

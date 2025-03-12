@@ -114,7 +114,7 @@ module.exports.login = async (req, res) => {
 
 // [POST] /api/v1/users/password/forgot
 module.exports.forgotPassword = async (req, res) => {
-    const email = req.body.email;
+    const { email } = req.body;
 
     const user = await User.findOne({
         email: email,
@@ -132,13 +132,13 @@ module.exports.forgotPassword = async (req, res) => {
     // mã OPT
     const otp = genareteHelper.generateRandomNumber(8);
 
-    // thời gian hết hạn
-    const timeExpire = 5;
+    // Thời gian hết hạn OTP (tính theo timestamp)
+    const timeExpire = 5; // 5p
 
     const objectForgotPassword = {
         email: email,
         otp: otp,
-        expires: Date.now() + timeExpire*60
+        expires: Date.now() + timeExpire * 60
     };
 
     // lưu vào database
@@ -153,19 +153,19 @@ module.exports.forgotPassword = async (req, res) => {
     `;
     sendMailHelper.sendMail(email, subject, html);
     
-    res.json({
-        code: 200,
-        message: "Đã gửi mã OTP qua email"
+    return res.status(200).json({ 
+        code: 200, 
+        message: "Đã gửi mã OTP qua email" 
     });
-
 
 };
 
 // // [POST] /api/v1/users/password/otp
 module.exports.otpPassword = async (req, res) => {
+
     const email = req.body.email;
     const otp = req.body.otp;
-
+    
     const result = await ForgotPassword.findOne({
         email: email,
         otp: otp
@@ -185,6 +185,8 @@ module.exports.otpPassword = async (req, res) => {
     });
 
     const token = user.token;
+    console.log(token);
+    
     res.cookie("token", token);
 
     res.json({

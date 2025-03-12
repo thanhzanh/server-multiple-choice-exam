@@ -207,3 +207,9 @@ module.exports.detail = async(req, res) => {
         });
     }
 };
+
+// [GET] /api/v1/exams/getExamLevels
+module.exports.getExamLevels = (req, res) => {
+    let levels = Exam.schema.path("level").enumValues;
+    res.json({ levels });
+};
