@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const slug = require('mongoose-slug-updater');
+mongoose.plugin(slug);
 
 const examSchema = new mongoose.Schema(
     {       
@@ -17,6 +19,11 @@ const examSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true 
+        },
+        slug: {
+            type: String,
+            slug: "title",
+            unique: true // DUY NHẤT
         },
         deleted: {
             type: Boolean,
