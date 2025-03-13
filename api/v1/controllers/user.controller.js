@@ -100,10 +100,9 @@ module.exports.login = async (req, res) => {
 
     const token = user.token;
     res.cookie("token", token, {
-        httpOnly: true, // Chặn JS đọc cookie
         secure: false, // Để false khi test, production thì dùng true
         sameSite: "strict", // Ngăn CSRF
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 giờ
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
     });
 
     res.status(200).json({
@@ -185,7 +184,6 @@ module.exports.otpPassword = async (req, res) => {
     });
 
     const token = user.token;
-    console.log(token);
     
     res.cookie("token", token);
 
@@ -277,7 +275,6 @@ module.exports.authGoogle = async (req, res) => {
         const authToken  = user.token;
         res.cookie("token", authToken,
             {
-                httpOnly: true, // Ngăn chặn JavaScript đọc cookie
                 secure: process.env.NODE_ENV === "production", // Chỉ bật trên HTTPS
                 sameSite: "strict", // Giảm nguy cơ CSRF
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày

@@ -33,7 +33,7 @@ app.use(
         cookie: {
             secure: false, // Đặt true nếu dùng HTTPS
             httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24, // 1 ngày
+            maxAge: 7 * 24 * 60 * 60 * 1000, 
         },
     })
 );
