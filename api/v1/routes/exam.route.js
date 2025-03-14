@@ -20,4 +20,8 @@ router.delete("/delete/:id", controller.delete);
 
 router.get("/levels", controller.getExamLevels);
 
+router.get("/search", controller.search);
+
+router.get("/:slug", controller.examBySlug);
+
 module.exports = router;

@@ -1,5 +1,5 @@
 const Exam = require("../models/exam.model");
-const User = require("../models/user.model");
+const Question = require("../models/question.model");
 const paginationHelper = require("../../../helpers/pagination");
 const searchHelper = require("../../../helpers/search");
 
@@ -212,4 +212,45 @@ module.exports.detail = async(req, res) => {
 module.exports.getExamLevels = (req, res) => {
     let levels = Exam.schema.path("level").enumValues;
     res.json({ levels });
+};
+
+// [GET] /api/v1/exams/search
+module.exports.search = async (req, res) => {
+    try {
+        const keyword = req.query.keyword;
+
+        const exams = await Exam.find({
+            title: { $regex: keyword, $options: "i" },
+            status: "active",
+            privacy: "public",
+            deleted: false
+        }).populate("createdBy", "fullName email avatar");
+
+        res.json(exams);
+    } catch (error) {
+        res.status(400).json({ error: "Lỗi server" });
+    }
+};
+
+// [GET] /api/v1/exams/:slug
+module.exports.examBySlug = async (req, res) => {
+    try {
+        const slug = req.params.slug;
+        
+        const exam = await Exam.findOne({ slug }).populate("createdBy", "fullName avatar");;
+
+        if (!exam) {
+            return res.status(400).json({ message: "Bài thi không tồn tại" });
+        }
+
+        // Lấy ra câu hỏi của bài thi đó
+        const questions = await Question.find({ examId: exam._id });
+        
+        res.json({
+            exam,
+            questions
+        });
+    } catch (error) {
+        res.status(400).json({ error: "Lỗi server" });
+    }
 };

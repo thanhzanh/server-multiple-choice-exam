@@ -6,6 +6,11 @@ const examSchema = new mongoose.Schema(
     {       
         title: String,
         description: String,
+        slug: {
+            type: String,
+            slug: "title",
+            unique: true // DUY NHẤT
+        },
         image: String,
         level: {
             type: String,
@@ -19,11 +24,6 @@ const examSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true 
-        },
-        slug: {
-            type: String,
-            slug: "title",
-            unique: true // DUY NHẤT
         },
         deleted: {
             type: Boolean,
