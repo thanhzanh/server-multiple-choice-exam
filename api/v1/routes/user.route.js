@@ -29,4 +29,6 @@ router.get("/getUser", authMiddleware.requireAuth, controller.getUser);
 
 router.put("/profile/info", authMiddleware.requireAuth, controller.updateProfile);
 
+router.post("/profile/change-password", authMiddleware.requireAuth, controller.changePassword);
+
 module.exports = router;

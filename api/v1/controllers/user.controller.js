@@ -349,3 +349,55 @@ module.exports.updateProfile = async (req, res) => {
     }
 };
 
+// [POST] /api/v1/users/profile/change-password
+module.exports.changePassword = async (req, res) => {
+    try {
+        const { current_password, new_password, password_confirmation } = req.body;
+
+        if (new_password !== password_confirmation) {
+            return res.status(400).json({ code: 400, message: "Mật khẩu xác nhận không khớp" });
+        }
+
+        // Lấy người dùng từ token
+        const userId = res.locals.user._id;
+
+        const user = await User.findOne({ 
+            _id: userId,
+            deleted: false
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                code: 400,
+                message: "Người dùng không tồn tại"
+            });
+        }
+        
+        if (!user.password) {
+            return res.status(400).json({
+                code: 400,
+                message: "Tài khoản của bạn đăng nhập bằng Google, không thể đổi mật khẩu"
+            });
+        }
+
+        // Kiểm tra mật khẩu cũ
+        if (user.password !== md5(current_password)) {
+            return res.status(400).json({
+                code: 400,
+                message: "Mật khẩu hiện tại không đúng"
+            });
+        }
+
+        // Cập nhật mật khẩu
+        user.password = md5(new_password);
+        await user.save();
+
+        return res.status(200).json({ 
+            code: 200,
+            message: "Thay đổi mật khẩu thành công" 
+        });
+    } catch (error) {
+        console.error("Lỗi khi thay đổi mật khẩu", error);
+    }
+    
+};
