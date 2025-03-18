@@ -10,6 +10,19 @@ const userSchema = new mongoose.Schema(
         fullName: String,
         email: String,
         password: String,
+        phone: {
+            type: String,
+            default: null
+        },  
+        gender: {
+            type: String,
+            enum: ["male", "female", "other"],
+            default: null
+        },
+        dateOfBirth: {
+            type: Date,
+            default: null
+        },
         avatar: String,
         token: {
             type: String,

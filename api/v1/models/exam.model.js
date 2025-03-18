@@ -11,6 +11,10 @@ const examSchema = new mongoose.Schema(
             slug: "title",
             unique: true // DUY NHẤT
         },
+        viewCount: {
+            type: Number,
+            default: 0
+        },
         image: String,
         level: {
             type: String,

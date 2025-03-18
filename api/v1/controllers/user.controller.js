@@ -323,3 +323,29 @@ module.exports.getUser = async (req, res) => {
     }
 };
 
+// [GET] /api/v1/users/profile/info
+module.exports.updateProfile = async (req, res) => {
+    try {
+        const userId = res.locals.user._id; // ID người dùng từ token
+        
+        const { fullName, phone, gender, dateOfBirth } = req.body;
+
+        // Cập nhật thông tin user
+        const updateUser = await User.findByIdAndUpdate(
+            { _id: userId }, 
+            {
+            fullName, phone, gender, dateOfBirth,
+            updatedAt: Date.now()
+        })
+            
+        res.status(200).json({
+            message: "Cập nhật thành công",
+            user: updateUser
+        });
+        
+    } catch (error) {
+        console.error("Lỗi khi cập nhật thông tin", error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+};
+
