@@ -1,5 +1,6 @@
 const Exam = require("../models/exam.model");
 const Question = require("../models/question.model");
+const User = require("../models/user.model");
 const paginationHelper = require("../../../helpers/pagination");
 const searchHelper = require("../../../helpers/search");
 
@@ -237,10 +238,14 @@ module.exports.examBySlug = async (req, res) => {
     try {
         const slug = req.params.slug;
         
-        const exam = await Exam.findOne({ slug }).populate("createdBy", "fullName avatar");;
+        const exam = await Exam.findOneAndUpdate(
+            { slug },
+            { $inc: { views: 1 }},
+            { new: true }
+        ).populate("createdBy", "fullName avatar");;
 
         if (!exam) {
-            return res.status(400).json({ message: "Bài thi không tồn tại" });
+            return res.status(400).json({ message: "Bài thi không tồn tại!" });
         }
 
         // Lấy ra câu hỏi của bài thi đó
@@ -249,6 +254,64 @@ module.exports.examBySlug = async (req, res) => {
         res.json({
             exam,
             questions
+        });
+    } catch (error) {
+        res.status(400).json({ error: "Lỗi server" });
+    }
+};
+
+// [POST] /api/v1/exams/favorite/:examId
+module.exports.toggleFavoriteExam = async (req, res) => {
+    try {
+        const userId = res.locals.user._id;
+
+        const { examId } = req.params;
+
+        const user = await User.findById({ _id: userId }).select("-password");        
+
+        if (!user) {
+            return res.status(404).json({ message: "Người dùng không tồn tại" });
+        }
+
+        // Nếu mà có id bài thi rồi thì loại bỏ, nếu chưa có thì push vào mảng
+        const index = user.favoriteExams.indexOf(examId);
+        if (index !== -1) {
+            user.favoriteExams.splice(index, 1); // Xóa examId khỏi mảng
+        } else {
+            user.favoriteExams.push(examId); // Thêm examId vào mảng
+        }
+
+        // Lưu vào database
+        await user.save();
+
+        res.json({
+            message: "Cập nhật yêu thích thành công",
+            favoriteExams: user.favoriteExams,
+        });
+    } catch (error) {
+        res.status(400).json({ error: "Lỗi server" });
+    }
+};
+
+// [GET] /api/v1/exams/favorite
+module.exports.getFavoriteExams = async (req, res) => {
+    try {
+        const userId = res.locals.user._id;
+
+        const user = await User.findById({ _id: userId }).populate({
+            path: "favoriteExams",
+            populate: {
+                path: "createdBy",
+                select: "fullName avatar" // Lấy thông tin người tạo bài thi
+            }
+        }); // Lấy thông tin bài thi            
+
+        if (!user) {
+            return res.status(404).json({ message: "Người dùng không tồn tại" });
+        }
+
+        res.json({
+            favoriteExams: user.favoriteExams
         });
     } catch (error) {
         res.status(400).json({ error: "Lỗi server" });

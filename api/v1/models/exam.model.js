@@ -11,7 +11,7 @@ const examSchema = new mongoose.Schema(
             slug: "title",
             unique: true // DUY NHẤT
         },
-        viewCount: {
+        views: {
             type: Number,
             default: 0
         },

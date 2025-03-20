@@ -22,6 +22,11 @@ router.get("/levels", controller.getExamLevels);
 
 router.get("/search", controller.search);
 
+router.get("/favorite", authMiddleware.requireAuth, controller.getFavoriteExams); // Danh sách bài thi yêu thích
+
 router.get("/:slug", controller.examBySlug);
+
+router.post("/favorite/:examId", authMiddleware.requireAuth, controller.toggleFavoriteExam); // Thêm xóa/ bài thi yêu thích
+
 
 module.exports = router;

@@ -28,6 +28,12 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: generate.generateRandomString(30)
         },
+        favoriteExams: [
+            { 
+                type: mongoose.Schema.Types.ObjectId, // Lưu ID bài thi yêu thích
+                ref: "Exam"
+            }
+        ],
         deleted: {
             type: Boolean,
             default: false
