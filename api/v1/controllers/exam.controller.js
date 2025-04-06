@@ -3,6 +3,7 @@ const Question = require("../models/question.model");
 const User = require("../models/user.model");
 const paginationHelper = require("../../../helpers/pagination");
 const searchHelper = require("../../../helpers/search");
+const slugify = require("slugify");
 
 // [GET] /api/v1/exams/index
 module.exports.index = async(req, res) => {
@@ -121,9 +122,12 @@ module.exports.create = async(req, res) => {
             return res.status(401).json({ code: 401, message: "Chưa xác thực người dùng" });
         }
         createdBy = res.locals.user._id;
+
+        // tạo slug
+        const slug = slugify(title, { lower: true, strict: true });
         
         // Lưu vào database
-        const exam = new Exam({ title, description, image, level, subject, topic, privacy, status, createdBy });
+        const exam = new Exam({ title, description, image, level, subject, topic, privacy, status, createdBy, slug });
         const data = await exam.save();
         
         res.json({
@@ -132,6 +136,7 @@ module.exports.create = async(req, res) => {
             data: data
         });
     } catch (error) {
+        console.error("Lỗi khi tạo đề thi:", error);
         res.json({
             code: 400,
             message: "Đã xãy ra lỗi"
@@ -218,18 +223,19 @@ module.exports.getExamLevels = (req, res) => {
 // [GET] /api/v1/exams/search
 module.exports.search = async (req, res) => {
     try {
-        const keyword = req.query.keyword;
+        const keyword = req.query.keyword;     
 
         const exams = await Exam.find({
             title: { $regex: keyword, $options: "i" },
             status: "active",
             privacy: "public",
             deleted: false
-        }).populate("createdBy", "fullName email avatar");
+        }).populate("createdBy", "fullName email avatar");        
 
         res.json(exams);
     } catch (error) {
-        res.status(400).json({ error: "Lỗi server" });
+        console.error("Lỗi server:", error);
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -298,6 +304,8 @@ module.exports.getFavoriteExams = async (req, res) => {
     try {
         const userId = res.locals.user._id;
 
+        const keyword = req.query.keyword ? req.query.keyword.trim() : "";
+
         const user = await User.findById({ _id: userId }).populate({
             path: "favoriteExams",
             populate: {
@@ -310,8 +318,16 @@ module.exports.getFavoriteExams = async (req, res) => {
             return res.status(404).json({ message: "Người dùng không tồn tại" });
         }
 
+        let favoriteExams = user.favoriteExams;
+
+        // Tìm kiếm
+        if (keyword) {
+            const regex = new RegExp(keyword, "i");
+            favoriteExams = favoriteExams.filter(exam => regex.test(exam.title)); // Lọc theo tiêu đề bài thi
+        }
+
         res.json({
-            favoriteExams: user.favoriteExams
+            favoriteExams
         });
     } catch (error) {
         res.status(400).json({ error: "Lỗi server" });
