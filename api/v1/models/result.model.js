@@ -2,22 +2,17 @@ const mongoose = require('mongoose');
 const slug = require('mongoose-slug-updater');
 mongoose.plugin(slug);
 
-const examResultSchema = new mongoose.Schema(
+const resultSchema = new mongoose.Schema(
     {       
-        user: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             require: true, // Lưu người làm bài
         },
-        exam: {
+        examId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Exam",
             require: true, // Lưu bài thi user làm
-        },
-        model: {
-            type: String,
-            enum: ["on_thi", "thi_thu"],
-            require: true, // Chức năng ôn thi hay thi thử
         },
         timeSelected: {
             type: Number,
@@ -47,7 +42,7 @@ const examResultSchema = new mongoose.Schema(
                     require: true
                 },
                 selectedOption: String, // Đáp án người dùng chọn
-                correctOption: String, // Đáp án đúng của câu hỏi
+                correctOption: [String], // Đáp án đúng của câu hỏi
                 isCorrect: Boolean, // Người dùng trả lời đúng hay không
             }
         ]
@@ -57,6 +52,6 @@ const examResultSchema = new mongoose.Schema(
     }
 );
 
-const ExamResult = mongoose.model('ExamResult', examResultSchema, "exam-results"); // exam-results: tên collection trong database
+const Result = mongoose.model('Result', resultSchema, "results"); // results: tên collection trong database
 
-module.exports = ExamResult;
+module.exports = Result;
