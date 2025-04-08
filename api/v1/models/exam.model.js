@@ -7,7 +7,6 @@ const examSchema = new mongoose.Schema(
         slug: {
             type: String,
             slug: "title",
-            unique: true // DUY NHẤT
         },
         views: {
             type: Number,

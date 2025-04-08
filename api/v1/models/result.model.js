@@ -1,30 +1,28 @@
 const mongoose = require('mongoose');
-const slug = require('mongoose-slug-updater');
-mongoose.plugin(slug);
 
 const resultSchema = new mongoose.Schema(
     {       
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            require: true, // Lưu người làm bài
+            required: true, // Lưu người làm bài
         },
         examId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Exam",
-            require: true, // Lưu bài thi user làm
+            required: true, // Lưu bài thi user làm
         },
         timeSelected: {
             type: Number,
-            require: true, // Thời gian chọn làm bài (phút)
+            required: true, // Thời gian chọn làm bài (phút)
         },
         totalQuestions: {
             type: Number,
-            require: true, // Tổng số câu hỏi của đề bài
+            required: true, // Tổng số câu hỏi của đề bài
         },
         correctAnswers: {
             type: Number,
-            defaultl: 0, // Số câu trả lời đúng
+            default: 0, // Số câu trả lời đúng
         },
         scores: {
             type: Number,
@@ -39,7 +37,7 @@ const resultSchema = new mongoose.Schema(
                 questionId: {
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "Question", // Tham chiếu đến bảng câu hỏi
-                    require: true
+                    required: true
                 },
                 selectedOption: String, // Đáp án người dùng chọn
                 correctOption: [String], // Đáp án đúng của câu hỏi
