@@ -276,6 +276,7 @@ module.exports.authGoogle = async (req, res) => {
         res.cookie("token", authToken,
             {
                 secure: process.env.NODE_ENV === "production", // Chỉ bật trên HTTPS
+                secure: true,
                 sameSite: "strict", // Giảm nguy cơ CSRF
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
             }
