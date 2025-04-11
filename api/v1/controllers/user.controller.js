@@ -100,10 +100,11 @@ module.exports.login = async (req, res) => {
 
     const token = user.token;
     res.cookie("token", token, {
-        secure: true,
-        sameSite: "strict", // Ngăn CSRF
+        httpOnly: true, // Bảo mật hơn nhưng JS không đọc được
+        secure: process.env.NODE_ENV === 'production', // true khi production
+        sameSite: "Lax", // Cho phép redirects từ bên ngoài
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-    });
+      });
 
     res.status(200).json({
         code: 200,
