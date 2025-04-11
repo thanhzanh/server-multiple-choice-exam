@@ -100,7 +100,6 @@ module.exports.login = async (req, res) => {
 
     const token = user.token;
     res.cookie("token", token, {
-        secure: false, // Để false khi test, production thì dùng true,
         secure: true,
         sameSite: "strict", // Ngăn CSRF
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
