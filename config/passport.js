@@ -7,7 +7,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: "http://server-multiple-choice-exam-production.up.railway.app/api/v1/users/auth/google/callback",
+            callbackURL: "https://server-multiple-choice-exam-production.up.railway.app/api/v1/users/auth/google/callback",
         },
         async (accessToken, refreshToken, profile, done) => {
             try {
