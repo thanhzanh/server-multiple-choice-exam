@@ -31,7 +31,7 @@ router.put("/profile/info", authMiddleware.requireAuth, controller.updateProfile
 
 router.post("/profile/change-password", authMiddleware.requireAuth, controller.changePassword);
 
-router.get('/me', requireAuth, (req, res) => {
+router.get('/me', authMiddleware.requireAuth, (req, res) => {
     res.json({
       success: true,
       user: res.locals.user // đã được gán trong middleware
