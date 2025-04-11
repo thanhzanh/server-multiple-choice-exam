@@ -263,18 +263,18 @@ module.exports.authGoogle = async (req, res) => {
     }
 
     // Gán token (sub) vào cookie
-    res.cookie("token", user.token, {
-      httpOnly: true,
-      secure: false, // true nếu dùng HTTPS
-      sameSite: "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-    });
+    res.cookie("token", token, {
+        httpOnly: true, // Bảo mật hơn nhưng JS không đọc được
+        secure: process.env.NODE_ENV === 'production', // true khi production
+        sameSite: "Lax", // Cho phép redirects từ bên ngoài
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      });
 
-    res.json({
-      code: 200,
-      message: "Đăng nhập thành công",
-      user
-    });
+      res.status(200).json({
+        code: 200,
+        message: "Đăng nhập thành công",
+        token: token 
+      });
 
   } catch (error) {
     console.error("Error verifying Google token:", error);
