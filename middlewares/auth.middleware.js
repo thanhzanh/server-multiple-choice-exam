@@ -3,7 +3,8 @@ const User = require("../api/v1/models/user.model");
 module.exports.requireAuth = async (req, res, next) => {
 
     const token = req.cookies.token;
-
+    console.log("TOKEN: ", token);
+    
     try {
         const user = await User.findOne({
             token: token,
