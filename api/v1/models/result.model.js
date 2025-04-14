@@ -12,10 +12,6 @@ const resultSchema = new mongoose.Schema(
             ref: "Exam",
             required: true, // Lưu bài thi user làm
         },
-        timeSelected: {
-            type: Number,
-            required: true, // Thời gian chọn làm bài (phút)
-        },
         totalQuestions: {
             type: Number,
             required: true, // Tổng số câu hỏi của đề bài
@@ -28,6 +24,11 @@ const resultSchema = new mongoose.Schema(
             type: Number,
             default: 0, // Điểm số
         },
+        timeSelected: {
+            type: Number,
+            required: true, // Thời gian chọn làm bài (phút)
+        },
+        durationReal: Number,   // thời gian người dùng thực sự làm (giây)
         submittedAt: {
             type: Date,
             default: Date.now(), // Thời gian nộp bài

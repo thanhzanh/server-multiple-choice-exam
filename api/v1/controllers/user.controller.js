@@ -100,11 +100,11 @@ module.exports.login = async (req, res) => {
 
     const token = user.token;
     res.cookie("token", token, {
-        httpOnly: true, // Bảo mật hơn nhưng JS không đọc được
-        secure: process.env.NODE_ENV === 'production', // true khi production
-        sameSite: "Lax", // Cho phép redirects từ bên ngoài
+        secure: process.env.NODE_ENV === "production", // Chỉ bật trên HTTPS
+        secure: true,
+        sameSite: "strict", // Giảm nguy cơ CSRF
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-      });
+    });
 
     res.status(200).json({
         code: 200,
@@ -239,51 +239,68 @@ module.exports.resetPassword = async (req, res) => {
 
 // [POST] /api/v1/users/auth/google
 module.exports.authGoogle = async (req, res) => {
-    const { token } = req.body;
+    try {
+        const { token } = req.body; // Nhận token từ frontend
+        
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Thiếu token"
+            });
+        }
 
-  try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+        // Xác thực token từ Google
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
 
-    const payload = ticket.getPayload(); // Thông tin user từ Google
-    const { email, name, picture, sub } = payload;
+        const payload = ticket.getPayload(); // Dữ liệu user từ Google
 
-    // Tìm hoặc tạo user
-    let user = await User.findOne({ email });
+        // Lấy ra user theo email
+        let user = await User.findOne({ email: payload.email });
 
-    if (!user) {
-      user = await User.create({
-        email,
-        name,
-        avatar: picture,
-        token: sub, // lưu sub để kiểm tra sau
-        provider: "google"
-      });
+        if (!user) {
+            // Nếu user chưa tồn tại thì tạo mới
+            user = new User({
+                googleId: payload.sub,
+                fullName: payload.name,
+                email: payload.email,
+                avatar: payload.picture,
+                password: null
+            });
+
+            await user.save();
+        }
+
+        const authToken  = user.token;
+        res.cookie("token", authToken,
+            {
+                secure: process.env.NODE_ENV === "production", // Chỉ bật trên HTTPS
+                secure: true,
+                sameSite: "strict", // Giảm nguy cơ CSRF
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+            }
+        );
+        
+        res.status(200).json({
+            success: true,
+            message: "Đăng nhập Google thành công",
+            token: authToken,
+            user: {
+                id: user._id,
+                name: user.fullName,
+                email: user.email
+            }
+        });
+
+    } catch (error) {
+        console.error("Lỗi xác thực Google", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server"
+        });
     }
-
-    // Gán token (sub) vào cookie
-    res.cookie("token", token, {
-        httpOnly: true, // Bảo mật hơn nhưng JS không đọc được
-        secure: process.env.NODE_ENV === 'production', // true khi production
-        sameSite: "Lax", // Cho phép redirects từ bên ngoài
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-      });
-
-      res.status(200).json({
-        code: 200,
-        message: "Đăng nhập thành công",
-        token: token 
-      });
-
-  } catch (error) {
-    console.error("Error verifying Google token:", error);
-    res.status(401).json({
-      code: 401,
-      message: "Token không hợp lệ hoặc hết hạn",
-    });
-  }
 };
 
 // [POST] /api/v1/users/logout

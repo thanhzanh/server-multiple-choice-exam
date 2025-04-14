@@ -5,8 +5,7 @@ const Question = require('../models/question.model');
 
 // [POST] /api/v1/results/submit
 module.exports.submitExamResult = async (req, res) => {
-    console.log("Chi tiet ket qua bai thi: ", req.body);
-    const { userId, examId, timeSelected, answers } = req.body;
+    const { userId, examId, timeSelected, answers, startTime  } = req.body;
 
     // Kiểm tra người dùng có trong database không
     const user = await User.findById(userId);
@@ -18,7 +17,6 @@ module.exports.submitExamResult = async (req, res) => {
 
     // Kiểm tra đề thi có trong database không
     const exam = await Exam.findById(examId);
-    console.log("Exam: ", exam);
     
     if (!exam) {
         return res.status(404).json({
@@ -42,7 +40,10 @@ module.exports.submitExamResult = async (req, res) => {
 
         // Tìm câu trả lời đúng
         const correctAnswer = Array.isArray(questionsData.correctAnswer) ? questionsData.correctAnswer[0] : questionsData.correctAnswer;
-        const isCorrect = answer.selectedOption === correctAnswer;
+        
+        // khi người dùng không chọn đáp án mà bấm nộp
+        const isAnswered = answer.selectedOption !== null && answer.selectedOption !== undefined && answer.selectedOption !== "";
+        const isCorrect = isAnswered && answer.selectedOption === correctAnswer;
         if (isCorrect) correctAnswers++; // Nếu có đáp án đúng thì câu trả lời đúng tăng lên
 
         // Chi tiết câu hỏi 
@@ -50,7 +51,7 @@ module.exports.submitExamResult = async (req, res) => {
             questionId: answer.questionId,
             selectedOption: answer.selectedOption,
             correctOption: correctAnswer,
-            isCorrect
+            isCorrect: isCorrect
         });
         console.log("Answer detail: ", answerDetail);
         
@@ -60,15 +61,20 @@ module.exports.submitExamResult = async (req, res) => {
     const totalQuestions = examQuestions.length;
     const scores = Math.round((correctAnswers / totalQuestions) * 10); // Thang điểm 10
 
+    const start = new Date(startTime); // parse lại từ FE
+    const end = new Date(); // thời điểm nộp bài
+    const durationReal = Math.floor((end - start) / 1000); 
+
     // Lưu vào database
     const result = await Result.create({
         userId: userId,
         examId: examId,
-        timeSelected,
         totalQuestions,
         correctAnswers,
         scores,
-        submittedAt: new Date(),
+        timeSelected,
+        durationReal,
+        submittedAt: end,
         answers: answerDetail
     });
 
@@ -77,4 +83,32 @@ module.exports.submitExamResult = async (req, res) => {
         message: "Thông thi kết quả bài làm",
         result
     });
+};
+
+// [GET] /api/v1/results/:resultId
+module.exports.getResultDetail = async (req, res) => {    
+    try {
+        const { resultId } = req.params;
+        console.log("Result Id: ", resultId);
+        const userId = res.locals.user._id;
+        console.log("Người dùng: ", userId);
+        
+        const result = await Result.findById(resultId).populate("userId", "fullName email").populate("examId", "title").populate("answers.questionId");
+
+        // check xem có kết quả thi không
+        if (!result) {
+            return res.status(404).json({ error: "Bạn chưa có kết quả thi" });
+        }
+
+        // Chỉ xem kết quả thi của chính người dùng đăng nhập
+        if (result.userId._id.toString() !== userId.toString()) {
+            return res.status(403).json({ error: "Bạn không có quyền xem kết quả này" });
+        }
+
+        res.status(200).json(result);
+        
+    } catch (error) {
+        console.error("Lỗi: ", error);
+        res.status(500).json({ error: "Lỗi khi lấy kết quả bài thi" });
+    }
 };

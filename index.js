@@ -44,7 +44,7 @@ app.use(passport.session());
 
 // Cho phép tất cả các domain truy cập API
 app.use(cors({
-    origin: "https://quizstudy.vercel.app", // Đổi thành domain frontend của bạn
+    origin: "http://localhost:5173", // Đổi thành domain frontend của bạn
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
