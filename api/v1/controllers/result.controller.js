@@ -89,9 +89,7 @@ module.exports.submitExamResult = async (req, res) => {
 module.exports.getResultDetail = async (req, res) => {    
     try {
         const { resultId } = req.params;
-        console.log("Result Id: ", resultId);
         const userId = res.locals.user._id;
-        console.log("Người dùng: ", userId);
         
         const result = await Result.findById(resultId).populate("userId", "fullName email").populate("examId", "title").populate("answers.questionId");
 
@@ -111,4 +109,24 @@ module.exports.getResultDetail = async (req, res) => {
         console.error("Lỗi: ", error);
         res.status(500).json({ error: "Lỗi khi lấy kết quả bài thi" });
     }
+};
+
+// [GET] /api/v1/results/list/:userId
+module.exports.getListResultDetail = async (req, res) => {
+    const { userId } = req.params;
+    
+    // Kiểm tra người dùng
+    const user = await User.findOne({ _id: userId, deleted: false });
+    if (!user) {
+        return res.status(404).json({ message: "Người dùng không tồn tại!" });
+    }
+
+    if (res.locals.user._id.toString() !== userId) {
+        return res.status(404).json({ message: "Bạn chỉ được xem kết quả của chính bạn!" });
+    }
+
+    // Kiểm tra kết quả
+    const results = await Result.find({ userId: userId }).populate("userId", "fullName email").populate("examId", "title").populate("answers.questionId");
+    
+    res.status(200).json(results);
 };
