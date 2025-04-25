@@ -10,7 +10,6 @@ module.exports.index = async(req, res) => {
     const user = res.locals.user; // user người dùng đăng nhập
     const find = {
         deleted: false,
-        status: "active",
         createdBy: user._id
     };
 
