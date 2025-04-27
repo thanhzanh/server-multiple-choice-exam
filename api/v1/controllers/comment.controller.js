@@ -26,11 +26,13 @@ module.exports.getCommentByExam = async (req, res) => {
     try {
         const { examId } = req.params;
 
-        const comments = await Comment.find({ examId: examId, deleted: false }).populate("userId", "fullName avatar"); // populate userId là lấy thông tin collection user gồm fullName avatar
+        const comments = await Comment.find({ examId: examId, deleted: false })
+        .populate("userId", "fullName avatar") // populate userId là lấy thông tin collection user gồm fullName avatar
+        .sort({ createdAt: -1 }); // Mới nhất trước
 
         res.status(200).json(comments);
     } catch (error) {
-        console.error("Lỗi khi tạo bình luận: ", error);
+        console.error("Lỗi khi lấy bình luận: ", error);
         res.status(400).json({ error: "Lỗi tạo bình luận" });
     }
 };
