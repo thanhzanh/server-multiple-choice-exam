@@ -3,6 +3,7 @@ const examRoutes = require("../routes/exam.route");
 const questionRoutes = require("../routes/question.route");
 const resultRoutes = require("../routes/result.route");
 const commentRoutes = require("../routes/comment.route");
+const settingRoutes = require("../routes/setting.route");
 
 module.exports = (app) => {
     const version = "/api/v1";
@@ -16,5 +17,7 @@ module.exports = (app) => {
     app.use(version + "/results", resultRoutes);
 
     app.use(version + "/comments", commentRoutes);
+
+    app.use(version + "/settings", settingRoutes);
 
 };
